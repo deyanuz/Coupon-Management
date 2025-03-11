@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "code": "SAVE10",
+    "type": "percentage",
+    "status": "active",
+    "expired_date": "2025-06-30",
+    "created_at": "2025-03-11T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "code": "FREESHIP",
+    "type": "free_shipping",
+    "status": "expired",
+    "expired_date": "2025-01-01",
+    "created_at": "2024-12-15T12:30:00Z"
+  },
+  {
+    "id": 3,
+    "code": "WELCOME50",
+    "type": "fixed_amount",
+    "status": "active",
+    "expired_date": "2025-09-15",
+    "created_at": "2025-02-01T08:45:00Z"
+  },
+  {
+    "id": 4,
+    "code": "NEWYEAR20",
+    "type": "percentage",
+    "status": "active",
+    "expired_date": "2026-01-05",
+    "created_at": "2024-12-31T23:59:59Z"
+  },
+  {
+    "id": 5,
+    "code": "SPRING15",
+    "type": "percentage",
+    "status": "inactive",
+    "expired_date": "2025-04-15",
+    "created_at": "2025-03-01T11:20:00Z"
+  },
+  {
+    "id": 6,
+    "code": "HOLIDAY100",
+    "type": "fixed_amount",
+    "status": "active",
+    "expired_date": "2025-12-31",
+    "created_at": "2025-03-05T15:10:00Z"
+  },
+  {
+    "id": 7,
+    "code": "SUMMER50",
+    "type": "percentage",
+    "status": "expired",
+    "expired_date": "2024-08-30",
+    "created_at": "2024-06-10T14:05:00Z"
+  },
+  {
+    "id": 8,
+    "code": "FLASHSALE",
+    "type": "fixed_amount",
+    "status": "active",
+    "expired_date": "2025-07-20",
+    "created_at": "2025-03-08T09:30:00Z"
+  },
+  {
+    "id": 9,
+    "code": "BLACKFRIDAY",
+    "type": "percentage",
+    "status": "active",
+    "expired_date": "2025-11-30",
+    "created_at": "2025-03-01T13:40:00Z"
+  },
+  {
+    "id": 10,
+    "code": "CYBERMONDAY",
+    "type": "fixed_amount",
+    "status": "inactive",
+    "expired_date": "2025-12-01",
+    "created_at": "2025-03-02T17:25:00Z"
+  }
+]
