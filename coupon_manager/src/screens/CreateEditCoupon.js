@@ -7,12 +7,12 @@ import {
   Box,
   TextField,
   MenuItem,
-  Divider,
 } from "@mui/material";
 import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import axios from "axios";
 
 function CreateEditCoupon({ selectedCoupon, onSave, onBack }) {
   const [formData, setFormData] = useState(
@@ -35,8 +35,53 @@ function CreateEditCoupon({ selectedCoupon, onSave, onBack }) {
     return dayjs(date).isBefore(dayjs(), "day");
   };
 
-  const handleSubmit = () => {
-    onSave(formData);
+  // Assuming you have a base API URL like this
+  const API_URL = "http://127.0.0.1:8000/coupons"; // Replace with your actual API URL
+
+  const handleSubmit = async () => {
+    try {
+      // Get the CSRF token (_xsrf) from the cookie
+      const csrfToken = document.cookie
+        .split(";")
+        .find((cookie) => cookie.trim().startsWith("_xsrf="))
+        ?.split("=")[1];
+
+      if (!csrfToken) {
+        console.error("CSRF token not found");
+        return; // Abort the request if the CSRF token is not found
+      }
+      console.log(csrfToken);
+      if (selectedCoupon) {
+        // Update an existing coupon (PUT request)
+        console.log(selectedCoupon);
+        const response = await axios.put(
+          `${API_URL}/${selectedCoupon.id}`,
+          formData,
+          {
+            headers: {
+              "X-CSRF-TOKEN": csrfToken, // Attach CSRF token to PUT request
+            },
+            withCredentials: true,
+          }
+        );
+        console.log("Coupon updated:", response.data);
+      } else {
+        console.log("Creating...");
+        // Create a new coupon (POST request)
+        const response = await axios.post(API_URL, formData, {
+          headers: {
+            "X-CSRF-TOKEN": csrfToken, // Attach CSRF token to POST request
+          },
+        });
+        console.log("Coupon created:", response.data);
+      }
+
+      // After successfully saving the coupon, call onSave and reset form if needed
+      onSave(formData);
+    } catch (err) {
+      console.error("Error saving coupon:", err);
+      // Handle error (maybe show an alert or snackbar)
+    }
   };
 
   return (

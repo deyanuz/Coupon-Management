@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Paper,
@@ -15,6 +15,7 @@ import {
   Tooltip,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -23,11 +24,14 @@ import {
 } from "@mui/icons-material";
 import dayjs from "dayjs";
 import "./App.css";
-import couponsData from "./data/coupons.json";
 import CreateEditCoupon from "./screens/CreateEditCoupon";
 
+import axios from "axios";
+
 function App() {
-  const [coupons, setCoupons] = useState(couponsData);
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [isCreateEdit, setIsCreateEdit] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -35,6 +39,29 @@ function App() {
     message: "",
     severity: "success",
   });
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const fetchCoupons = async () => {
+    try {
+      setLoading(true);
+
+      const response = await axios.get("http://127.0.0.1:8000/coupons"); // Replace with actual API URL
+      setCoupons(response.data["data"]);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to fetch coupons");
+      setSnackbar({
+        open: true,
+        message: "Failed to fetch coupons. Please try again later.",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = (formData) => {
     if (selectedCoupon) {
@@ -105,7 +132,7 @@ function App() {
       />
     );
   }
-
+  // console.log(document.cookie);
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box
@@ -128,94 +155,107 @@ function App() {
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">ID</TableCell>
-              <TableCell align="center">Code</TableCell>
-              <TableCell align="center">Type</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Expiry Date</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {coupons.map((coupon) => (
-              <TableRow key={coupon.id}>
-                <TableCell align="center">{coupon.id}</TableCell>
-                <TableCell align="center">{coupon.code}</TableCell>
-                <TableCell align="center" sx={{ textTransform: "capitalize" }}>
-                  {coupon.type.replace("_", " ")}
-                </TableCell>
-                <TableCell align="center">
-                  <Box
-                    component="span"
-                    sx={{
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 1,
-                      backgroundColor:
-                        coupon.status === "active"
-                          ? "success.light"
-                          : coupon.status === "inactive"
-                          ? "warning.light"
-                          : "error.light",
-                      color: "white",
-                    }}
-                  >
-                    {coupon.status}
-                  </Box>
-                </TableCell>
-                <TableCell align="center">
-                  <Box
-                    sx={{
-                      color: isDateExpired(coupon.expired_date)
-                        ? "error.main"
-                        : "inherit",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 1,
-                    }}
-                  >
-                    {dayjs(coupon.expired_date).format("MMMM D, YYYY")}
-                    {isDateExpired(coupon.expired_date) && (
-                      <Typography variant="caption" color="error">
-                        (Expired)
-                      </Typography>
-                    )}
-                  </Box>
-                </TableCell>
-                <TableCell align="center">
-                  <Box
-                    sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                  >
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => handleEdit(coupon)}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDelete(coupon.id)}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </TableCell>
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+          <Typography color="error">{error}</Typography>
+        </Box>
+      ) : (
+        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">ID</TableCell>
+                <TableCell align="center">Code</TableCell>
+                <TableCell align="center">Type</TableCell>
+                <TableCell align="center">Status</TableCell>
+                <TableCell align="center">Expiry Date</TableCell>
+                <TableCell align="center">Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {coupons.map((coupon) => (
+                <TableRow key={coupon.id}>
+                  <TableCell align="center">{coupon.id}</TableCell>
+                  <TableCell align="center">{coupon.code}</TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{ textTransform: "capitalize" }}
+                  >
+                    {coupon.type.replace("_", " ")}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      component="span"
+                      sx={{
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 1,
+                        backgroundColor:
+                          coupon.status === "active"
+                            ? "success.light"
+                            : coupon.status === "inactive"
+                            ? "warning.light"
+                            : "error.light",
+                        color: "white",
+                      }}
+                    >
+                      {coupon.status}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      sx={{
+                        color: isDateExpired(coupon.expired_date)
+                          ? "error.main"
+                          : "inherit",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      {dayjs(coupon.expired_date).format("MMMM D, YYYY")}
+                      {isDateExpired(coupon.expired_date) && (
+                        <Typography variant="caption" color="error">
+                          (Expired)
+                        </Typography>
+                      )}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                    >
+                      <Tooltip title="Edit">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(coupon)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(coupon.id)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       <Snackbar
         open={snackbar.open}

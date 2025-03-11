@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CouponController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+// Route to get all coupons
+Route::get('/coupons', [CouponController::class, 'index']);
+Route::post('/coupons', [CouponController::class, 'store']); // Create new coupon
+Route::get('/coupons/{id}', [CouponController::class, 'show']); // Get single coupon
+Route::put('/coupons/{id}', [CouponController::class, 'update']); // Update coupon
+Route::delete('/coupons/{id}', [CouponController::class, 'destroy']); // Delete coupon
